@@ -1,6 +1,7 @@
 const express = require('express')
-const { request, response } = require('express')
 const app = express()
+
+app.use(express.json())
 
 let notes = [
     {
@@ -54,11 +55,43 @@ app.delete('/api/notes/:id', (req, res) => {
     res.status(204).end()
 })
 
+const generateId = () => {
+    return Math.round(Math.random() * 100)
+}
+
+app.post('/api/notes', (req, res) => {
+    const body = req.body
+
+    if (!body.name || !body.number) {
+        return res.status(400).json({
+            error: 'content missing'
+        })
+    }
+
+    if (notes.map(n => n.name).includes(body.name)) {
+        return res.status(400).json({
+            error: 'name already in list'
+        })
+    }
+
+    const note = {
+        name: body.name,
+        number: body.number,
+        id: generateId(),
+    }
+
+    console.log(note)
+
+    notes = notes.concat(note)
+
+    res.json(note)
+})
+
 app.get('api/notes', (req, res) =>{
     res.json(notes)
 })
 
-const port = 3001
+const port = 3003
 app.listen(port, () => {
     console.log('Server running on port ${port}')
 })
